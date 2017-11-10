@@ -47,7 +47,9 @@ hax = [hax; findall(hfig, 'type', 'legend')];
 % tightinset calculations.
 htx = findall(hfig, 'type', 'text');
 hcb = findall(hfig, 'type', 'colorbar');
-htx = [htx; [hcb.Label]'];
+if ~isempty(hcb)
+    htx = [htx; [hcb.Label]'];
+end
 htx(contains({htx.Visible}, 'off')) = [];
 
 % get the original units, so we can change and reset these again
