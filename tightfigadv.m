@@ -119,9 +119,9 @@ movedown = min(min(pos(:,2) - ti(:,2)), min(ext(:,2)));
 
 % we will also alter the height and width of the figure to just
 % encompass the topmost and rightmost axes and lables
-figwidth = max(max(pos(:,1) + pos(:,3) + ti(:,3) - moveleft), max(sum(ext(:,[1 3]),2)));
+figwidth = max(max(pos(:,1) + pos(:,3) + ti(:,3)), max(sum(ext(:,[1 3]),2))) - moveleft;
 
-figheight = max(max(pos(:,2) + pos(:,4) + ti(:,4) - movedown), max(sum(ext(:,[2 4]),2)));
+figheight = max(max(pos(:,2) + pos(:,4) + ti(:,4)), max(sum(ext(:,[2 4]),2))) - movedown;
 
 % Resets temporary changes made to colorbar pos
 if numel(hax) > 1
