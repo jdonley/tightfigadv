@@ -50,16 +50,25 @@ hcb = findall(hfig, 'type', 'colorbar');
 if ~isempty(hcb)
     htx = [htx; [hcb.Label]'];
 end
-htx(contains({htx.Visible}, 'off')) = [];
+if ~isempty(htx)
+    htx(contains({htx.Visible}, 'off')) = [];
+end
+% Get parents of text objects because the extent is based on the parent
+% position
+htxPar = get(htx, 'Parent');
 
 % get the original units, so we can change and reset these again
 % later
 origaxunits = get(hax, 'Units');
 origtxunits = get(htx, 'Units');
+origtxparunits = cellfun(@(x) x.Units, htxPar, 'un', 0);
 
 % change the units to cm
 set(hax, 'Units', 'centimeters');
 set(htx, 'Units', 'centimeters');
+cellfun(@set,htxPar,...
+    repmat({'Units'},numel(htxPar),1),...
+    repmat({'centimeters'},numel(htxPar),1));
 
 % get various position parameters of the axes
 hax_ti_ind = arrayfun(@(x) (isa(x,'matlab.graphics.axis.Axes')),...
@@ -79,15 +88,13 @@ else
 end
 
 % get the global extents of the text objects
-if numel(htx) > 1
+if numel(htx) > 1 && ~isempty(htx)
     ext = cell2mat(get(htx, 'Extent'));
-    extPar = get(htx, 'Parent');
-    extParPos = cell2mat(get([extPar{:}],'Position'));
+    extParPos = cell2mat(get([htxPar{:}],'Position'));
     ext(:,1:2) = ext(:,1:2) + extParPos(:,1:2);
-else
+elseif ~isempty(htx)
     ext = get(htx, 'Extent');
-    extPar = get(htx, 'Parent');
-    ext(1:2) = ext(1:2) + extPar.Position(1:2);
+    ext(1:2) = ext(1:2) + htxPar.Position(1:2);
 end
 
 % ensure very tiny border so outer box always appears
@@ -113,14 +120,14 @@ end
 
 % we will move all the axes down and to the left by the amount
 % necessary to just show the bottom and leftmost axes and labels etc.
+if isempty(htx), ext = pos - ti; end
 moveleft = min( min(pos(:,1) - ti(:,1)), min(ext(:,1)) );
-
 movedown = min(min(pos(:,2) - ti(:,2)), min(ext(:,2)));
 
 % we will also alter the height and width of the figure to just
 % encompass the topmost and rightmost axes and lables
+if isempty(htx), ext(:,1:2) = pos(:,1:2);ext(:,3:4) = pos(:,3:4) + ti(:,3:4); end
 figwidth = max(max(pos(:,1) + pos(:,3) + ti(:,3)), max(sum(ext(:,[1 3]),2))) - moveleft;
-
 figheight = max(max(pos(:,2) + pos(:,4) + ti(:,4)), max(sum(ext(:,[2 4]),2))) - movedown;
 
 % Resets temporary changes made to colorbar pos
@@ -157,12 +164,16 @@ end
 if ~iscell(origtxunits)
     origtxunits = {origtxunits};
 end
+if ~iscell(origtxparunits)
+    origtxparunits = {origtxparunits};
+end
 
 for i = 1:numel(hax)
     set(hax(i), 'Units', origaxunits{i});
 end
 for i = 1:numel(htx)
     set(htx(i), 'Units', origtxunits{i});
+    set(htxPar{i}, 'Units', origtxparunits{i});
 end
 
 set(hfig, 'Units', origfigunits);
