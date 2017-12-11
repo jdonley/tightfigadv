@@ -142,6 +142,18 @@ for i = 1:numel(hax)
     set(hax(i), 'Position', [pos(i,1:2) - [moveleft,movedown], pos(i,3:4)]);
 end
 
+% Move any colorbars that have manual positioning set because they will not
+% move with their parent axis
+hcbML = hcb(strcmpi(get(hcb,'Location'),'manual')); %ML: Manual Location
+for i = 1:numel(hcbML)
+    if numel(hcbML) > 1
+        pos = cell2mat(get(hcbML, 'Position')); % Set pos to colorbar pos
+    else
+        pos = get(hcbML, 'Position'); % Set pos to colorbar pos
+    end
+    set(hcbML(i), 'Position', [pos(i,1:2) - [moveleft,movedown], pos(i,3:4)]);
+end
+
 origfigunits = get(hfig, 'Units');
 
 set(hfig, 'Units', 'centimeters');
