@@ -137,8 +137,12 @@ else
     pos = get(hax, 'Position');
 end
 
-% move all the axes
+% move all the axes but dont move legends whose position is dependent on
+% the parent axis
 for i = 1:numel(hax)
+    if strcmpi(hax(i).Tag,'legend') && ~strcmpi(hax(i).Location,'none')
+        continue;
+    end
     set(hax(i), 'Position', [pos(i,1:2) - [moveleft,movedown], pos(i,3:4)]);
 end
 
@@ -180,6 +184,7 @@ if ~iscell(origtxparunits)
     origtxparunits = {origtxparunits};
 end
 
+drawnow; % Force drawing of objects before units are reset.
 for i = 1:numel(hax)
     set(hax(i), 'Units', origaxunits{i});
 end
